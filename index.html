@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kursorganisator · DaZ/DaF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f2f0fa;
+  --card: #ffffff;
+  --primary: #3d1894;
+  --primary-light: #5824c4;
+  --blue: #1848d4;
+  --blue-light: #2060f0;
+  --cyan: #04b0cc;
+  --orange: #e85508;
+  --yellow: #e8ac00;
+  --rose: #cc2070;
+  --ink: #100828;
+  --sidebar-w: 288px;
+  --topbar-h: 72px;
+  --r-xs: 8px;
+  --r-sm: 14px;
+  --r-md: 22px;
+  --r-lg: 32px;
+  --shadow-sm: 0 2px 8px rgba(61,24,148,0.10);
+  --shadow-md: 0 4px 18px rgba(61,24,148,0.16);
+  --shadow-lg: 0 8px 36px rgba(61,24,148,0.22);
+  --transition: 0.18s ease;
+}
+html, body { height: 100%; font-family: 'Sora', sans-serif; font-size: 15px; background: var(--bg); color: var(--ink); }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* ===== TOPBAR ===== */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--topbar-h);
+  background: linear-gradient(90deg, var(--primary) 0%, var(--blue) 60%, var(--cyan) 100%);
+  display: flex; align-items: center; padding: 0 24px;
+  box-shadow: 0 3px 18px rgba(61,24,148,0.28);
+}
+#logo {
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0; margin-right: 32px;
+}
+#logo-icon {
+  width: 42px; height: 42px; border-radius: var(--r-sm);
+  background: rgba(232,172,0,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 1.35rem; color: var(--yellow);
+  border: 2px solid rgba(232,172,0,0.45);
+  letter-spacing: -1px;
+  flex-shrink: 0;
+}
+#logo-text { color: #fff; font-weight: 700; font-size: 1.02rem; line-height: 1.25; }
+#logo-sub { color: rgba(255,255,255,0.65); font-size: 0.78rem; font-weight: 400; }
+
+#nav-tabs { display: flex; gap: 4px; margin-left: auto; }
+.nav-tab {
+  padding: 8px 20px; border-radius: 99px;
+  color: rgba(255,255,255,0.72); font-weight: 600; font-size: 0.92rem;
+  background: rgba(255,255,255,0.0); transition: var(--transition);
+  cursor: pointer; white-space: nowrap; border: 1.5px solid transparent;
+}
+.nav-tab:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.nav-tab.active {
+  background: rgba(255,255,255,0.22); color: #fff;
+  border-color: rgba(255,255,255,0.38);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+#gist-btn {
+  margin-left: 16px; padding: 7px 16px; border-radius: 99px;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8);
+  font-size: 0.82rem; font-weight: 600; border: 1.5px solid rgba(255,255,255,0.25);
+  transition: var(--transition); cursor: pointer;
+}
+#gist-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
+
+/* ===== LAYOUT ===== */
+#layout {
+  display: flex; padding-top: var(--topbar-h); min-height: 100%;
+}
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--ink);
+  position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+  overflow-y: auto; display: flex; flex-direction: column;
+  z-index: 50;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+#sidebar-header {
+  padding: 20px 20px 10px;
+  color: rgba(255,255,255,0.45); font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+#course-list { padding: 4px 12px; flex: 1; }
+.course-item {
+  position: relative; display: flex; align-items: center;
+  padding: 11px 14px; border-radius: var(--r-sm); margin-bottom: 4px;
+  cursor: pointer; transition: var(--transition);
+  color: rgba(255,255,255,0.72); font-weight: 500; font-size: 0.95rem;
+  gap: 10px;
+}
+.course-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.course-item.active {
+  background: linear-gradient(90deg, rgba(24,72,212,0.55) 0%, rgba(4,176,204,0.35) 100%);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(4,176,204,0.3);
+}
+.course-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.course-badge {
+  background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.7);
+  border-radius: 99px; padding: 1px 8px; font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.course-item.active .course-badge { background: rgba(4,176,204,0.35); color: var(--cyan); }
+.course-delete {
+  display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(204,32,112,0.2); color: var(--rose);
+  font-size: 0.75rem; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.course-item:hover .course-delete { display: flex; }
+.course-delete:hover { background: var(--rose); color: #fff; }
+
+#new-course-area { padding: 12px 12px 8px; border-top: 1px solid rgba(255,255,255,0.08); }
+#new-course-row { display: flex; gap: 8px; }
+#new-course-input {
+  flex: 1; padding: 9px 14px; border-radius: 99px;
+  background: rgba(255,255,255,0.09); border: 1.5px solid rgba(255,255,255,0.14);
+  color: #fff; font-size: 0.92rem; outline: none; transition: var(--transition);
+}
+#new-course-input::placeholder { color: rgba(255,255,255,0.35); }
+#new-course-input:focus { background: rgba(255,255,255,0.13); border-color: var(--cyan); }
+#new-course-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--cyan));
+  color: #fff; font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: var(--transition); box-shadow: var(--shadow-sm);
+}
+#new-course-btn:hover { transform: scale(1.08); box-shadow: var(--shadow-md); }
+
+#sync-status {
+  padding: 10px 16px; font-size: 0.78rem; color: rgba(255,255,255,0.4);
+  display: flex; align-items: center; gap: 6px;
+}
+.sync-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.25); flex-shrink: 0;
+}
+.sync-dot.ok { background: #22c55e; }
+.sync-dot.error { background: var(--rose); }
+.sync-dot.syncing { background: var(--yellow); animation: pulse-dot 0.8s infinite; }
+@keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+#sidebar-footer {
+  padding: 10px 16px 16px;
+  color: rgba(255,255,255,0.22); font-size: 0.72rem; text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ===== MAIN CONTENT ===== */
+#main {
+  margin-left: var(--sidebar-w); flex: 1;
+  padding: 40px 48px; max-width: calc(1200px + var(--sidebar-w));
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+.panel { display: none; }
+.panel.active { display: block; animation: fade-in 0.22s ease; }
+@keyframes fade-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+
+.panel-title {
+  font-size: 2rem; font-weight: 800; color: var(--primary);
+  margin-bottom: 28px; display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.panel-title .title-badge {
+  font-size: 0.88rem; font-weight: 700; padding: 4px 14px;
+  background: rgba(61,24,148,0.10); color: var(--primary); border-radius: 99px;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 22px; border-radius: 99px;
+  font-weight: 700; font-size: 0.92rem; transition: var(--transition);
+  box-shadow: var(--shadow-sm); cursor: pointer; border: none; outline: none;
+  font-family: inherit; white-space: nowrap;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); filter: brightness(1.08); }
+.btn:active { transform: translateY(0); }
+.btn-blue { background: linear-gradient(135deg, var(--blue), var(--blue-light)); color: #fff; }
+.btn-orange { background: linear-gradient(135deg, var(--orange), #ff7a2f); color: #fff; }
+.btn-sky { background: linear-gradient(135deg, var(--cyan), #06c8e8); color: #fff; }
+.btn-yellow { background: linear-gradient(135deg, var(--yellow), #ffcc2f); color: var(--ink); }
+.btn-rose { background: linear-gradient(135deg, var(--rose), #e83080); color: #fff; }
+.btn-violet { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; }
+.btn-ghost {
+  background: transparent; color: var(--primary);
+  border: 2px solid rgba(61,24,148,0.22); box-shadow: none;
+}
+.btn-ghost:hover { background: rgba(61,24,148,0.06); box-shadow: var(--shadow-sm); }
+.btn-sm { padding: 7px 15px; font-size: 0.82rem; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--card); border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm); padding: 24px 28px; margin-bottom: 20px;
+}
+.card-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 14px; }
+
+/* ===== INPUT ROW ===== */
+.input-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.text-input {
+  flex: 1; min-width: 180px; padding: 11px 18px; border-radius: 99px;
+  border: 2px solid rgba(61,24,148,0.18); background: var(--bg);
+  font-size: 0.95rem; outline: none; transition: var(--transition);
+  font-family: inherit; color: var(--ink);
+}
+.text-input:focus { border-color: var(--blue-light); background: #fff; box-shadow: 0 0 0 3px rgba(32,96,240,0.12); }
+.text-input::placeholder { color: rgba(16,8,40,0.35); }
+
+/* ===== CHIPS ===== */
+#participant-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 0;
+  border-radius: 99px; overflow: hidden;
+  background: rgba(61,24,148,0.09); border: 1.5px solid rgba(61,24,148,0.16);
+  transition: var(--transition); font-size: 0.9rem;
+}
+.chip:hover { background: rgba(61,24,148,0.16); border-color: rgba(61,24,148,0.32); }
+.chip-name {
+  padding: 6px 12px 6px 14px; font-weight: 600; color: var(--primary);
+  cursor: pointer;
+}
+.chip-del {
+  padding: 6px 10px 6px 4px; color: var(--rose);
+  cursor: pointer; font-size: 0.85rem; transition: var(--transition);
+}
+.chip-del:hover { color: #fff; background: var(--rose); }
+
+/* ===== IMPORT AREA ===== */
+#import-toggle { margin-top: 8px; }
+#import-area {
+  margin-top: 14px; padding: 18px; background: var(--bg);
+  border-radius: var(--r-sm); border: 1.5px dashed rgba(61,24,148,0.2);
+}
+#import-area textarea {
+  width: 100%; height: 110px; padding: 10px 14px; border-radius: var(--r-xs);
+  border: 1.5px solid rgba(61,24,148,0.18); font-size: 0.9rem; resize: vertical;
+  font-family: inherit; outline: none; transition: var(--transition);
+}
+#import-area textarea:focus { border-color: var(--blue-light); }
+.import-btns { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ===== ANWESENHEIT ===== */
+#attendance-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px;
+  margin-top: 18px;
+}
+.att-card {
+  padding: 18px 14px; border-radius: var(--r-md);
+  background: var(--card); box-shadow: var(--shadow-sm);
+  cursor: pointer; text-align: center; transition: var(--transition);
+  border: 2.5px solid transparent; user-select: none;
+  font-weight: 700; font-size: 1rem; color: var(--ink);
+}
+.att-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.att-card.present {
+  border-color: var(--blue-light);
+  background: linear-gradient(135deg, rgba(32,96,240,0.06), rgba(4,176,204,0.06));
+  color: var(--blue);
+}
+.att-card.absent {
+  opacity: 0.48; text-decoration: line-through; color: rgba(16,8,40,0.45);
+  background: rgba(16,8,40,0.03);
+}
+.att-icon { font-size: 1.5rem; margin-bottom: 6px; }
+
+/* ===== GRUPPEN ===== */
+#groups-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+#group-size-input {
+  width: 72px; padding: 10px 14px; border-radius: 99px;
+  border: 2px solid rgba(61,24,148,0.18); background: var(--bg);
+  font-size: 1rem; font-weight: 700; text-align: center;
+  outline: none; transition: var(--transition); font-family: inherit;
+}
+#group-size-input:focus { border-color: var(--blue-light); }
+
+#groups-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;
+}
+.group-card {
+  border-radius: var(--r-md); padding: 18px 20px;
+  box-shadow: var(--shadow-md); transition: var(--transition);
+  border: 2px solid transparent;
+}
+.group-card[draggable]:hover { box-shadow: var(--shadow-lg); }
+.group-title {
+  font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+  margin-bottom: 10px; opacity: 0.7;
+}
+.group-member {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: var(--r-xs);
+  font-weight: 600; font-size: 0.93rem; margin-bottom: 4px;
+  cursor: grab; background: rgba(255,255,255,0.45); transition: var(--transition);
+  user-select: none;
+}
+.group-member:hover { background: rgba(255,255,255,0.72); }
+.group-member.dragging { opacity: 0.4; }
+.group-member-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+.group-drop-target { border: 2px dashed rgba(255,255,255,0.6) !important; }
+
+/* GROUP COLORS */
+.gc0  { background: linear-gradient(135deg,#e8f0ff,#cddeff); color:#1848d4; }
+.gc1  { background: linear-gradient(135deg,#fff0e0,#ffd8b0); color:#c04000; }
+.gc2  { background: linear-gradient(135deg,#e0fff4,#b0f0d8); color:#007850; }
+.gc3  { background: linear-gradient(135deg,#fce8f4,#f4b8dc); color:#900050; }
+.gc4  { background: linear-gradient(135deg,#f0e8ff,#d8c0ff); color:#5800b8; }
+.gc5  { background: linear-gradient(135deg,#fffce0,#fff4a0); color:#806000; }
+.gc6  { background: linear-gradient(135deg,#e0f8ff,#b0ecff); color:#005878; }
+.gc7  { background: linear-gradient(135deg,#ffe8e8,#ffb8b8); color:#900000; }
+.gc8  { background: linear-gradient(135deg,#e8ffe8,#b8f0b8); color:#006020; }
+.gc9  { background: linear-gradient(135deg,#fff8e8,#ffe8b8); color:#805000; }
+.gc10 { background: linear-gradient(135deg,#f8e8ff,#e8c0ff); color:#680090; }
+.gc11 { background: linear-gradient(135deg,#e8f8ff,#c8eeff); color:#004880; }
+
+/* ===== EINZELAUSWAHL ===== */
+#stage {
+  border-radius: var(--r-lg); padding: 48px 32px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--blue) 55%, var(--cyan) 100%);
+  text-align: center; margin-bottom: 24px; box-shadow: var(--shadow-lg);
+  min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#stage-name {
+  font-size: 3.2rem; font-weight: 900; color: #fff;
+  margin-bottom: 10px; line-height: 1.1;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.25);
+  transition: all 0.06s ease;
+  min-height: 4rem;
+}
+#stage-name.spinning { color: var(--cyan); }
+#stage-name.chosen { color: var(--yellow); animation: chosen-pop 0.4s ease; }
+@keyframes chosen-pop {
+  0% { transform: scale(0.7); } 60% { transform: scale(1.12); } 100% { transform: scale(1); }
+}
+#stage-sub {
+  font-size: 1.2rem; color: rgba(255,255,255,0.75); font-weight: 600; min-height: 1.8rem;
+}
+#stage-sub.show { color: var(--yellow); }
+#pick-btn {
+  font-size: 1.1rem; padding: 14px 40px; margin-top: 10px;
+  background: rgba(255,255,255,0.18); color: #fff;
+  border: 2px solid rgba(255,255,255,0.35); border-radius: 99px;
+  font-weight: 800; font-family: inherit; cursor: pointer;
+  transition: var(--transition); box-shadow: var(--shadow-sm);
+}
+#pick-btn:hover:not(:disabled) { background: rgba(255,255,255,0.28); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+#pick-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== TIMER ===== */
+#timer-display {
+  font-size: 5rem; font-weight: 900; color: var(--primary);
+  letter-spacing: 0.04em; text-align: center; margin: 24px 0;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.4s ease;
+}
+#timer-display.warning { color: var(--orange); animation: pulse-timer 0.7s infinite; }
+#timer-display.done { color: var(--rose); }
+@keyframes pulse-timer { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+
+#timer-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.preset-btn {
+  padding: 8px 18px; border-radius: 99px; font-weight: 700; font-size: 0.88rem;
+  background: rgba(61,24,148,0.09); color: var(--primary);
+  border: 1.5px solid rgba(61,24,148,0.18); transition: var(--transition);
+  font-family: inherit; cursor: pointer;
+}
+.preset-btn:hover { background: var(--primary); color: #fff; transform: translateY(-1px); }
+
+#timer-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+/* ===== FULLSCREEN TIMER ===== */
+#fullscreen-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: #000; flex-direction: column; align-items: center; justify-content: center;
+}
+#fullscreen-overlay.active { display: flex; }
+#fs-timer { font-size: clamp(6rem,20vw,30rem); font-weight: 900; color: var(--cyan); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+#fs-timer.warning { color: var(--orange); animation: pulse-timer 0.7s infinite; }
+#fs-timer.done { color: var(--rose); }
+#fs-controls { display: flex; gap: 14px; margin-top: 32px; }
+#fs-close {
+  position: absolute; top: 24px; right: 28px;
+  color: rgba(255,255,255,0.45); font-size: 1.6rem; cursor: pointer;
+  background: none; border: none; font-family: inherit; transition: var(--transition);
+}
+#fs-close:hover { color: #fff; }
+#fs-label { color: rgba(255,255,255,0.35); font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+
+/* ===== MODALS ===== */
+#modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(16,8,40,0.52); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+#modal-overlay.active { display: flex; }
+.modal-box {
+  background: var(--card); border-radius: var(--r-lg);
+  padding: 32px 36px; min-width: 340px; max-width: 520px; width: 90%;
+  box-shadow: var(--shadow-lg); animation: modal-in 0.2s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:scale(0.93) translateY(12px); } to { opacity:1; transform:none; } }
+.modal-title { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 18px; }
+.modal-btns { display: flex; gap: 10px; margin-top: 18px; justify-content: flex-end; }
+.modal-body { font-size: 0.95rem; color: var(--ink); line-height: 1.6; }
+.modal-label { font-size: 0.85rem; font-weight: 700; color: rgba(16,8,40,0.55); margin-bottom: 6px; }
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: rgba(16,8,40,0.92); color: #fff;
+  padding: 11px 26px; border-radius: 99px; font-weight: 600; font-size: 0.92rem;
+  z-index: 9000; transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s;
+  opacity: 0; pointer-events: none; white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.32);
+}
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ===== STATS BAR ===== */
+.stats-bar {
+  display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 22px;
+}
+.stat-pill {
+  padding: 6px 16px; border-radius: 99px; font-size: 0.82rem; font-weight: 700;
+  display: flex; align-items: center; gap: 6px;
+}
+.stat-pill.blue { background: rgba(24,72,212,0.10); color: var(--blue); }
+.stat-pill.green { background: rgba(34,197,94,0.12); color: #16a34a; }
+.stat-pill.orange { background: rgba(232,85,8,0.10); color: var(--orange); }
+
+/* ===== GIST MODAL ===== */
+#gist-modal-inner .gist-info {
+  font-size: 0.85rem; color: rgba(16,8,40,0.55); margin-bottom: 12px; line-height: 1.55;
+}
+#gist-modal-inner input {
+  width: 100%; margin-bottom: 14px;
+}
+
+/* ===== SCROLLBARS ===== */
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: rgba(61,24,148,0.05); }
+::-webkit-scrollbar-thumb { background: rgba(61,24,148,0.18); border-radius: 4px; }
+
+/* ===== UTILITY ===== */
+.hidden { display: none !important; }
+.sep { width: 100%; height: 1px; background: rgba(61,24,148,0.10); margin: 18px 0; }
+.no-participants-msg { color: rgba(16,8,40,0.4); font-size: 0.95rem; font-style: italic; padding: 20px 0; }
+
+/* ===== TIMER MINUTE INPUT ===== */
+#timer-minute-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+#timer-min-input {
+  width: 90px; padding: 10px 14px; border-radius: 99px;
+  border: 2px solid rgba(61,24,148,0.18); background: var(--bg);
+  font-size: 1.1rem; font-weight: 700; text-align: center;
+  outline: none; transition: var(--transition); font-family: inherit;
+}
+#timer-min-input:focus { border-color: var(--blue-light); }
+#timer-minute-row label { font-weight: 600; color: rgba(16,8,40,0.55); font-size: 0.92rem; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div id="logo">
+    <div id="logo-icon">K·</div>
+    <div>
+      <div id="logo-text">Kursorganisator</div>
+      <div id="logo-sub">DaZ · DaF</div>
+    </div>
+  </div>
+  <div id="nav-tabs">
+    <div class="nav-tab active" data-panel="panel-kurs">Kurs</div>
+    <div class="nav-tab" data-panel="panel-anwesenheit">Anwesenheit</div>
+    <div class="nav-tab" data-panel="panel-gruppen">Gruppen</div>
+    <div class="nav-tab" data-panel="panel-einzelauswahl">Einzelauswahl</div>
+    <div class="nav-tab" data-panel="panel-timer">Timer</div>
+  </div>
+  <button id="gist-btn" onclick="openGistModal()">☁ Cloud-Sync</button>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="sidebar-header">Kurse</div>
+  <div id="course-list"></div>
+  <div id="new-course-area">
+    <div id="new-course-row">
+      <input id="new-course-input" class="text-input" placeholder="Neuer Kurs…" type="text" autocomplete="off">
+      <button id="new-course-btn" title="Kurs anlegen">+</button>
+    </div>
+  </div>
+  <div id="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-text">Kein Cloud-Sync</span>
+  </div>
+  <div id="sidebar-footer">Kursorganisator · DaZ/DaF<br>Alle Daten lokal im Browser</div>
+</div>
+
+<!-- MAIN -->
+<div id="layout">
+<div id="main">
+
+  <!-- PANEL: KURS -->
+  <div class="panel active" id="panel-kurs">
+    <div class="panel-title">
+      <span id="kurs-title-text">Kein Kurs</span>
+      <span class="title-badge" id="kurs-count-badge">0 Teilnehmer</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="openRenameModal()">✏ Umbenennen</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Teilnehmer hinzufügen</div>
+      <div class="input-row">
+        <input class="text-input" id="add-participant-input" placeholder="Name eingeben…" type="text" autocomplete="off">
+        <button class="btn btn-blue btn-sm" onclick="addParticipant()">+ Hinzufügen</button>
+      </div>
+      <div id="participant-chips"></div>
+    </div>
+    <div class="card" id="import-toggle">
+      <div class="card-title" style="cursor:pointer;display:flex;align-items:center;gap:8px;" onclick="toggleImport()">
+        <span id="import-chevron">▶</span> Import (ein Name pro Zeile)
+      </div>
+      <div id="import-area" class="hidden">
+        <textarea id="import-textarea" placeholder="Max Mustermann&#10;Fatima Al-Rashid&#10;Li Wei&#10;…"></textarea>
+        <div class="import-btns">
+          <button class="btn btn-sky btn-sm" onclick="doImport()">Importieren</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearImport()">Leeren</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: ANWESENHEIT -->
+  <div class="panel" id="panel-anwesenheit">
+    <div class="panel-title">
+      Anwesenheit
+      <span class="title-badge" id="att-count-badge">0 anwesend</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue btn-sm" onclick="setAllAttendance(true)">✓ Alle anwesend</button>
+      <button class="btn btn-ghost btn-sm" onclick="setAllAttendance(false)">✗ Alle abwesend</button>
+    </div>
+    <div id="attendance-grid"></div>
+  </div>
+
+  <!-- PANEL: GRUPPEN -->
+  <div class="panel" id="panel-gruppen">
+    <div class="panel-title">
+      Gruppen
+      <span class="title-badge" id="groups-count-badge">—</span>
+    </div>
+    <div id="groups-controls">
+      <label style="font-weight:700;color:rgba(16,8,40,0.55);font-size:0.92rem;">Gruppengröße:</label>
+      <input type="number" id="group-size-input" value="3" min="2" max="20">
+      <button class="btn btn-violet" onclick="buildGroups()">🎲 Gruppen bilden</button>
+      <button class="btn btn-sky hidden" id="reroll-btn" onclick="buildGroups()">🔀 Neu würfeln</button>
+    </div>
+    <div id="groups-grid"></div>
+  </div>
+
+  <!-- PANEL: EINZELAUSWAHL -->
+  <div class="panel" id="panel-einzelauswahl">
+    <div class="panel-title">Einzelauswahl</div>
+    <div id="stage">
+      <div id="stage-name">—</div>
+      <div id="stage-sub">Klicke auf Auswählen</div>
+      <button id="pick-btn" onclick="startPick()">🎲 Auswählen</button>
+    </div>
+  </div>
+
+  <!-- PANEL: TIMER -->
+  <div class="panel" id="panel-timer">
+    <div class="panel-title">Timer</div>
+    <div class="card" style="max-width:520px;">
+      <div id="timer-display">05:00</div>
+      <div id="timer-minute-row">
+        <label>Minuten:</label>
+        <input type="number" id="timer-min-input" value="5" min="0" max="99">
+        <button class="btn btn-ghost btn-sm" onclick="setTimerFromInput()">Setzen</button>
+      </div>
+      <div id="timer-presets">
+        <button class="preset-btn" onclick="setTimer(1)">1 min</button>
+        <button class="preset-btn" onclick="setTimer(2)">2 min</button>
+        <button class="preset-btn" onclick="setTimer(3)">3 min</button>
+        <button class="preset-btn" onclick="setTimer(5)">5 min</button>
+        <button class="preset-btn" onclick="setTimer(10)">10 min</button>
+        <button class="preset-btn" onclick="setTimer(15)">15 min</button>
+        <button class="preset-btn" onclick="setTimer(20)">20 min</button>
+        <button class="preset-btn" onclick="setTimer(30)">30 min</button>
+      </div>
+      <div id="timer-controls">
+        <button class="btn btn-blue" id="timer-start-btn" onclick="timerStart()">▶ Start</button>
+        <button class="btn btn-ghost" id="timer-pause-btn" onclick="timerPause()" disabled>⏸ Pause</button>
+        <button class="btn btn-ghost" onclick="timerReset()">↺ Reset</button>
+        <button class="btn btn-ghost" onclick="openFullscreen()">⛶ Vollbild</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- FULLSCREEN TIMER -->
+<div id="fullscreen-overlay">
+  <button id="fs-close" onclick="closeFullscreen()" title="Schließen (Esc)">✕</button>
+  <div id="fs-label">TIMER</div>
+  <div id="fs-timer">05:00</div>
+  <div id="fs-controls">
+    <button class="btn btn-blue" onclick="timerStart()" id="fs-start-btn">▶ Start</button>
+    <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="timerPause()" id="fs-pause-btn">⏸ Pause</button>
+    <button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="timerReset()">↺ Reset</button>
+  </div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// =============================================
+// STATE
+// =============================================
+const STORAGE_KEY = 'kursorg_v1';
+const GIST_TOKEN_KEY = 'korg_gist_token';
+const GIST_ID_KEY = 'korg_gist_id';
+
+let state = {
+  courses: [],
+  activeCourseId: null
+};
+
+// attendance: { [courseId]: { [participantName]: true/false } }
+let attendance = {};
+
+// groups: current groups array
+let currentGroups = [];
+
+// Gist
+let gistToken = '';
+let gistId = '';
+let syncTimeout = null;
+let syncStatus = 'idle'; // idle | syncing | ok | error
+
+// Timer
+let timerTotal = 300; // seconds
+let timerRemaining = 300;
+let timerInterval = null;
+let timerRunning = false;
+let fsOpen = false;
+
+// Pick
+let pickInterval = null;
+let picking = false;
+
+// =============================================
+// PERSISTENCE
+// =============================================
+function saveLocal() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ courses: state.courses, activeCourseId: state.activeCourseId }));
+  } catch(e) { /* localStorage not available */ }
+}
+
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      state.courses = parsed.courses || [];
+      state.activeCourseId = parsed.activeCourseId || null;
+    }
+  } catch(e) {}
+}
+
+function loadGistSettings() {
+  try {
+    gistToken = localStorage.getItem(GIST_TOKEN_KEY) || '';
+    gistId = localStorage.getItem(GIST_ID_KEY) || '';
+  } catch(e) {}
+}
+
+function saveGistSettings() {
+  try {
+    localStorage.setItem(GIST_TOKEN_KEY, gistToken);
+    localStorage.setItem(GIST_ID_KEY, gistId);
+  } catch(e) {}
+}
+
+function scheduleSyncPush() {
+  if (!gistToken) return;
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(pushToGist, 1500);
+}
+
+async function pushToGist() {
+  if (!gistToken) return;
+  setSyncStatus('syncing');
+  const content = JSON.stringify({ courses: state.courses, activeCourseId: state.activeCourseId }, null, 2);
+  const body = { files: { 'kursorganisator-data.json': { content } } };
+  try {
+    let res;
+    if (gistId) {
+      res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: 'PATCH', headers: { Authorization: `token ${gistToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } else {
+      res = await fetch('https://api.github.com/gists', {
+        method: 'POST', headers: { Authorization: `token ${gistToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, description: 'Kursorganisator DaZ/DaF', public: false })
+      });
+    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!gistId) { gistId = data.id; saveGistSettings(); }
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+  }
+}
+
+async function pullFromGist() {
+  if (!gistToken || !gistId) return;
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+      headers: { Authorization: `token ${gistToken}` }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const file = data.files['kursorganisator-data.json'];
+    if (file && file.content) {
+      const parsed = JSON.parse(file.content);
+      state.courses = parsed.courses || [];
+      state.activeCourseId = parsed.activeCourseId || null;
+      saveLocal();
+      renderAll();
+      showToast('Cloud-Daten geladen ✓');
+    }
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+  }
+}
+
+function setSyncStatus(s) {
+  syncStatus = s;
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  dot.className = 'sync-dot';
+  if (s === 'idle') { txt.textContent = gistToken ? 'Sync aktiv' : 'Kein Cloud-Sync'; }
+  else if (s === 'syncing') { dot.classList.add('syncing'); txt.textContent = 'Synchronisiere…'; }
+  else if (s === 'ok') { dot.classList.add('ok'); txt.textContent = 'Sync: ' + new Date().toLocaleTimeString('de-DE', {hour:'2-digit',minute:'2-digit'}); }
+  else if (s === 'error') { dot.classList.add('error'); txt.textContent = 'Sync-Fehler'; }
+}
+
+// =============================================
+// HELPERS
+// =============================================
+function uid() { return Math.random().toString(36).slice(2, 10); }
+
+function showToast(msg, duration = 2400) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function getActiveCourse() {
+  return state.courses.find(c => c.id === state.activeCourseId) || null;
+}
+
+function getAttendance(courseId) {
+  if (!attendance[courseId]) attendance[courseId] = {};
+  return attendance[courseId];
+}
+
+function getPresentParticipants() {
+  const course = getActiveCourse();
+  if (!course) return [];
+  const att = getAttendance(course.id);
+  return course.participants.filter(p => att[p] !== false);
+}
+
+function persist() {
+  saveLocal();
+  scheduleSyncPush();
+}
+
+// =============================================
+// NAVIGATION
+// =============================================
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+  });
+});
+
+// =============================================
+// RENDER: SIDEBAR
+// =============================================
+function renderSidebar() {
+  const list = document.getElementById('course-list');
+  list.innerHTML = '';
+  state.courses.forEach(course => {
+    const div = document.createElement('div');
+    div.className = 'course-item' + (course.id === state.activeCourseId ? ' active' : '');
+    div.innerHTML = `
+      <span class="course-name">${escHtml(course.name)}</span>
+      <span class="course-badge">${course.participants.length}</span>
+      <button class="course-delete" title="Kurs löschen" onclick="deleteCourse('${course.id}',event)">×</button>
+    `;
+    div.addEventListener('click', () => selectCourse(course.id));
+    list.appendChild(div);
+  });
+}
+
+function selectCourse(id) {
+  if (state.activeCourseId !== id) {
+    // Reset attendance for old course tracking, but keep object
+  }
+  state.activeCourseId = id;
+  persist();
+  renderAll();
+}
+
+function deleteCourse(id, e) {
+  e.stopPropagation();
+  const course = state.courses.find(c => c.id === id);
+  if (!course) return;
+  openConfirmModal(
+    `Kurs „${course.name}" löschen?`,
+    'Alle Teilnehmerdaten dieses Kurses werden unwiderruflich gelöscht.',
+    () => {
+      state.courses = state.courses.filter(c => c.id !== id);
+      if (state.activeCourseId === id) state.activeCourseId = state.courses[0]?.id || null;
+      persist();
+      renderAll();
+      showToast('Kurs gelöscht');
+    }
+  );
+}
+
+// =============================================
+// NEW COURSE
+// =============================================
+document.getElementById('new-course-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addCourse();
+});
+document.getElementById('new-course-btn').addEventListener('click', addCourse);
+
+function addCourse() {
+  const inp = document.getElementById('new-course-input');
+  const name = inp.value.trim();
+  if (!name) return;
+  const course = { id: uid(), name, participants: [] };
+  state.courses.push(course);
+  state.activeCourseId = course.id;
+  inp.value = '';
+  persist();
+  renderAll();
+  showToast(`Kurs „${name}" angelegt`);
+}
+
+// =============================================
+// RENDER: KURS PANEL
+// =============================================
+function renderKursPanel() {
+  const course = getActiveCourse();
+  const titleEl = document.getElementById('kurs-title-text');
+  const badgeEl = document.getElementById('kurs-count-badge');
+  if (!course) {
+    titleEl.textContent = 'Kein Kurs ausgewählt';
+    badgeEl.textContent = '0 Teilnehmer';
+    document.getElementById('participant-chips').innerHTML = '<p class="no-participants-msg">Lege zuerst einen Kurs an.</p>';
+    return;
+  }
+  titleEl.textContent = course.name;
+  badgeEl.textContent = course.participants.length + (course.participants.length === 1 ? ' Teilnehmer' : ' Teilnehmer');
+  renderChips(course);
+}
+
+function renderChips(course) {
+  const container = document.getElementById('participant-chips');
+  if (course.participants.length === 0) {
+    container.innerHTML = '<p class="no-participants-msg">Noch keine Teilnehmer. Füge Namen hinzu oder importiere eine Liste.</p>';
+    return;
+  }
+  container.innerHTML = '';
+  course.participants.forEach(name => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.innerHTML = `<span class="chip-name" onclick="openEditParticipantModal('${escAttr(name)}')">${escHtml(name)}</span><span class="chip-del" onclick="removeParticipant('${escAttr(name)}')">×</span>`;
+    container.appendChild(chip);
+  });
+}
+
+function addParticipant() {
+  const inp = document.getElementById('add-participant-input');
+  const name = inp.value.trim();
+  const course = getActiveCourse();
+  if (!course || !name) return;
+  if (course.participants.includes(name)) { showToast('Name bereits vorhanden'); return; }
+  course.participants.push(name);
+  inp.value = '';
+  inp.focus();
+  persist();
+  renderKursPanel();
+  renderSidebar();
+}
+
+document.getElementById('add-participant-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addParticipant();
+});
+
+function removeParticipant(name) {
+  const course = getActiveCourse();
+  if (!course) return;
+  course.participants = course.participants.filter(p => p !== name);
+  const att = getAttendance(course.id);
+  delete att[name];
+  persist();
+  renderKursPanel();
+  renderSidebar();
+  renderAttendancePanel();
+}
+
+function doImport() {
+  const ta = document.getElementById('import-textarea');
+  const lines = ta.value.split('\n').map(l => l.trim()).filter(Boolean);
+  const course = getActiveCourse();
+  if (!course) { showToast('Kein Kurs ausgewählt'); return; }
+  let added = 0;
+  lines.forEach(name => {
+    if (!course.participants.includes(name)) { course.participants.push(name); added++; }
+  });
+  ta.value = '';
+  persist();
+  renderKursPanel();
+  renderSidebar();
+  showToast(`${added} Teilnehmer importiert`);
+}
+
+function clearImport() {
+  document.getElementById('import-textarea').value = '';
+}
+
+let importOpen = false;
+function toggleImport() {
+  importOpen = !importOpen;
+  document.getElementById('import-area').classList.toggle('hidden', !importOpen);
+  document.getElementById('import-chevron').textContent = importOpen ? '▼' : '▶';
+}
+
+// =============================================
+// RENDER: ANWESENHEIT
+// =============================================
+function renderAttendancePanel() {
+  const course = getActiveCourse();
+  const grid = document.getElementById('attendance-grid');
+  const badge = document.getElementById('att-count-badge');
+  if (!course || course.participants.length === 0) {
+    grid.innerHTML = '<p class="no-participants-msg">Keine Teilnehmer vorhanden.</p>';
+    badge.textContent = '0 anwesend';
+    return;
+  }
+  const att = getAttendance(course.id);
+  const presentCount = course.participants.filter(p => att[p] !== false).length;
+  badge.textContent = `${presentCount} anwesend`;
+  grid.innerHTML = '';
+  course.participants.forEach(name => {
+    const present = att[name] !== false;
+    const card = document.createElement('div');
+    card.className = 'att-card ' + (present ? 'present' : 'absent');
+    card.innerHTML = `<div class="att-icon">${present ? '✓' : '✗'}</div><div>${escHtml(name)}</div>`;
+    card.addEventListener('click', () => toggleAttendance(name));
+    grid.appendChild(card);
+  });
+}
+
+function toggleAttendance(name) {
+  const course = getActiveCourse();
+  if (!course) return;
+  const att = getAttendance(course.id);
+  att[name] = att[name] === false ? true : false;
+  renderAttendancePanel();
+}
+
+function setAllAttendance(val) {
+  const course = getActiveCourse();
+  if (!course) return;
+  const att = getAttendance(course.id);
+  course.participants.forEach(p => att[p] = val);
+  renderAttendancePanel();
+  showToast(val ? 'Alle anwesend' : 'Alle abwesend');
+}
+
+// =============================================
+// RENDER: GRUPPEN
+// =============================================
+const GROUP_COLORS = ['gc0','gc1','gc2','gc3','gc4','gc5','gc6','gc7','gc8','gc9','gc10','gc11'];
+
+function buildGroups() {
+  const present = getPresentParticipants();
+  if (present.length === 0) { showToast('Keine anwesenden Teilnehmer'); return; }
+  const size = Math.max(2, parseInt(document.getElementById('group-size-input').value) || 3);
+  const shuffled = fisherYates([...present]);
+  const groups = [];
+  for (let i = 0; i < shuffled.length; i += size) {
+    groups.push(shuffled.slice(i, i + size));
+  }
+  // Distribute remainder: if last group has only 1, merge with previous
+  if (groups.length > 1 && groups[groups.length - 1].length === 1) {
+    const last = groups.pop();
+    groups[groups.length - 1].push(last[0]);
+  }
+  currentGroups = groups;
+  document.getElementById('reroll-btn').classList.remove('hidden');
+  renderGroupsPanel();
+  showToast(`${groups.length} Gruppen gebildet`);
+}
+
+function fisherYates(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderGroupsPanel() {
+  const grid = document.getElementById('groups-grid');
+  const badge = document.getElementById('groups-count-badge');
+  grid.innerHTML = '';
+  if (currentGroups.length === 0) {
+    badge.textContent = '—';
+    grid.innerHTML = '<p class="no-participants-msg">Noch keine Gruppen gebildet.</p>';
+    return;
+  }
+  badge.textContent = currentGroups.length + ' Gruppe' + (currentGroups.length !== 1 ? 'n' : '');
+  currentGroups.forEach((members, gi) => {
+    const card = document.createElement('div');
+    card.className = 'group-card ' + GROUP_COLORS[gi % GROUP_COLORS.length];
+    card.dataset.groupIndex = gi;
+    card.innerHTML = `<div class="group-title">Gruppe ${gi + 1}</div>`;
+    members.forEach(name => {
+      const m = document.createElement('div');
+      m.className = 'group-member';
+      m.draggable = true;
+      m.dataset.name = name;
+      m.dataset.fromGroup = gi;
+      m.innerHTML = `<span class="group-member-dot"></span>${escHtml(name)}`;
+      m.addEventListener('dragstart', onMemberDragStart);
+      card.appendChild(m);
+    });
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('group-drop-target'); });
+    card.addEventListener('dragleave', () => card.classList.remove('group-drop-target'));
+    card.addEventListener('drop', e => { e.preventDefault(); card.classList.remove('group-drop-target'); onMemberDrop(e, gi); });
+    grid.appendChild(card);
+  });
+}
+
+let dragName = null, dragFrom = null;
+function onMemberDragStart(e) {
+  dragName = e.currentTarget.dataset.name;
+  dragFrom = parseInt(e.currentTarget.dataset.fromGroup);
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onMemberDrop(e, toGroup) {
+  if (dragName === null || dragFrom === null || dragFrom === toGroup) return;
+  // Move member
+  currentGroups[dragFrom] = currentGroups[dragFrom].filter(n => n !== dragName);
+  currentGroups[toGroup].push(dragName);
+  // Remove empty groups
+  currentGroups = currentGroups.filter(g => g.length > 0);
+  dragName = null; dragFrom = null;
+  renderGroupsPanel();
+}
+
+// =============================================
+// EINZELAUSWAHL
+// =============================================
+function startPick() {
+  if (picking) return;
+  const present = getPresentParticipants();
+  if (present.length === 0) { showToast('Keine anwesenden Teilnehmer'); return; }
+  if (present.length === 1) {
+    showChosen(present[0]);
+    return;
+  }
+  picking = true;
+  const btn = document.getElementById('pick-btn');
+  btn.disabled = true;
+  const stageEl = document.getElementById('stage-name');
+  const subEl = document.getElementById('stage-sub');
+  stageEl.className = 'spinning';
+  subEl.textContent = '';
+  subEl.className = '';
+
+  const ticks = 22 + Math.floor(Math.random() * 14);
+  const COLORS = ['#04b0cc','#e8ac00','#cc2070','#2060f0','#5824c4','#e85508'];
+  let count = 0;
+  const interval = 72;
+
+  pickInterval = setInterval(() => {
+    const name = present[Math.floor(Math.random() * present.length)];
+    stageEl.textContent = name;
+    stageEl.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    stageEl.style.transform = `scale(${0.88 + Math.random() * 0.28})`;
+    count++;
+    if (count >= ticks) {
+      clearInterval(pickInterval);
+      const chosen = present[Math.floor(Math.random() * present.length)];
+      showChosen(chosen);
+      picking = false;
+      btn.disabled = false;
+    }
+  }, interval);
+}
+
+function showChosen(name) {
+  const stageEl = document.getElementById('stage-name');
+  const subEl = document.getElementById('stage-sub');
+  stageEl.textContent = name;
+  stageEl.style.color = '';
+  stageEl.style.transform = '';
+  stageEl.className = 'chosen';
+  subEl.textContent = '🎉 Du bist dran!';
+  subEl.className = 'show';
+}
+
+// =============================================
+// TIMER
+// =============================================
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function updateTimerDisplay() {
+  const s = timerRemaining;
+  const fmt = formatTime(s);
+  document.getElementById('timer-display').textContent = fmt;
+  document.getElementById('fs-timer').textContent = fmt;
+
+  const mainDisp = document.getElementById('timer-display');
+  const fsDisp = document.getElementById('fs-timer');
+  mainDisp.className = '';
+  fsDisp.className = '';
+  if (s <= 0) {
+    mainDisp.classList.add('done');
+    fsDisp.classList.add('done');
+  } else if (s <= 30) {
+    mainDisp.classList.add('warning');
+    fsDisp.classList.add('warning');
+  }
+
+  document.getElementById('timer-start-btn').disabled = timerRunning || s <= 0;
+  document.getElementById('timer-pause-btn').disabled = !timerRunning;
+  document.getElementById('fs-start-btn').disabled = timerRunning || s <= 0;
+  document.getElementById('fs-pause-btn').disabled = !timerRunning;
+}
+
+function setTimer(minutes) {
+  timerReset();
+  timerTotal = minutes * 60;
+  timerRemaining = timerTotal;
+  document.getElementById('timer-min-input').value = minutes;
+  updateTimerDisplay();
+}
+
+function setTimerFromInput() {
+  const v = Math.max(0, Math.min(99, parseInt(document.getElementById('timer-min-input').value) || 0));
+  setTimer(v);
+}
+
+function timerStart() {
+  if (timerRunning || timerRemaining <= 0) return;
+  timerRunning = true;
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      playChime();
+    }
+  }, 1000);
+  updateTimerDisplay();
+}
+
+function timerPause() {
+  if (!timerRunning) return;
+  timerRunning = false;
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+}
+
+function timerReset() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  timerRemaining = timerTotal;
+  updateTimerDisplay();
+}
+
+function openFullscreen() {
+  fsOpen = true;
+  document.getElementById('fullscreen-overlay').classList.add('active');
+  updateTimerDisplay();
+}
+
+function closeFullscreen() {
+  fsOpen = false;
+  document.getElementById('fullscreen-overlay').classList.remove('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && fsOpen) closeFullscreen();
+});
+
+// Web Audio Chime
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const freqs = [523, 659, 784, 1047]; // C5, E5, G5, C6
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.28;
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.exponentialRampToValueAtTime(0.35, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t); osc.stop(t + 0.55);
+    });
+  } catch(e) {}
+}
+
+// =============================================
+// MODALS
+// =============================================
+function openModal(html) {
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function openConfirmModal(title, body, onConfirm) {
+  openModal(`
+    <div class="modal-title">${escHtml(title)}</div>
+    <div class="modal-body">${escHtml(body)}</div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-rose btn-sm" onclick="confirmAction()">Löschen</button>
+    </div>
+  `);
+  window._confirmCb = onConfirm;
+}
+
+window.confirmAction = function() {
+  closeModal();
+  if (window._confirmCb) window._confirmCb();
+};
+
+function openRenameModal() {
+  const course = getActiveCourse();
+  if (!course) return;
+  openModal(`
+    <div class="modal-title">Kurs umbenennen</div>
+    <div class="modal-label">Neuer Kursname</div>
+    <input class="text-input" id="rename-input" value="${escAttr(course.name)}" style="width:100%;margin-bottom:4px;">
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-blue btn-sm" onclick="doRename()">Speichern</button>
+    </div>
+  `);
+  setTimeout(() => { const i = document.getElementById('rename-input'); if(i){i.focus();i.select();} }, 60);
+  document.getElementById('rename-input')?.addEventListener('keydown', e => { if(e.key==='Enter') doRename(); });
+}
+
+window.doRename = function() {
+  const inp = document.getElementById('rename-input');
+  const name = inp?.value.trim();
+  const course = getActiveCourse();
+  if (!course || !name) return;
+  course.name = name;
+  persist();
+  renderAll();
+  closeModal();
+  showToast('Kurs umbenannt');
+};
+
+function openEditParticipantModal(oldName) {
+  openModal(`
+    <div class="modal-title">Teilnehmer bearbeiten</div>
+    <div class="modal-label">Name</div>
+    <input class="text-input" id="edit-p-input" value="${escAttr(oldName)}" style="width:100%;margin-bottom:4px;">
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-blue btn-sm" onclick="doEditParticipant('${escAttr(oldName)}')">Speichern</button>
+    </div>
+  `);
+  setTimeout(() => { const i = document.getElementById('edit-p-input'); if(i){i.focus();i.select();} }, 60);
+  document.getElementById('edit-p-input')?.addEventListener('keydown', e => { if(e.key==='Enter') window.doEditParticipant(oldName); });
+}
+
+window.doEditParticipant = function(oldName) {
+  const inp = document.getElementById('edit-p-input');
+  const newName = inp?.value.trim();
+  const course = getActiveCourse();
+  if (!course || !newName || !oldName) return;
+  if (newName !== oldName && course.participants.includes(newName)) { showToast('Name bereits vorhanden'); return; }
+  const idx = course.participants.indexOf(oldName);
+  if (idx !== -1) course.participants[idx] = newName;
+  const att = getAttendance(course.id);
+  if (oldName in att) { att[newName] = att[oldName]; delete att[oldName]; }
+  persist();
+  renderKursPanel();
+  renderAttendancePanel();
+  closeModal();
+  showToast('Name geändert');
+};
+
+// =============================================
+// GIST MODAL
+// =============================================
+function openGistModal() {
+  const connected = !!gistToken;
+  openModal(`
+    <div class="modal-title">☁ Cloud-Sync via GitHub Gist</div>
+    <div id="gist-modal-inner">
+      ${connected ? `
+        <p class="modal-body" style="margin-bottom:14px;">✅ Cloud-Sync ist aktiv.<br>Gist-ID: <code style="font-size:0.78rem;">${escHtml(gistId || '(wird angelegt)')}</code></p>
+        <div class="modal-btns" style="justify-content:flex-start;gap:10px;margin-top:0;">
+          <button class="btn btn-ghost btn-sm" onclick="disconnectGist()">🔌 Trennen</button>
+          <button class="btn btn-sky btn-sm" onclick="pullFromGist().then(()=>closeModal())">↓ Jetzt laden</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModal()">Schließen</button>
+        </div>
+      ` : `
+        <p class="gist-info">Einmalig einen GitHub-Token mit <strong>gist</strong>-Berechtigung anlegen: <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--blue-light);">github.com/settings/tokens</a></p>
+        <div class="modal-label">GitHub Token</div>
+        <input class="text-input" id="gist-token-input" type="password" placeholder="ghp_…" style="width:100%;margin-bottom:12px;">
+        <div class="modal-label">Gist-ID (optional, für vorhandenen Gist)</div>
+        <input class="text-input" id="gist-id-input" placeholder="leer lassen = neuer Gist" style="width:100%;margin-bottom:4px;">
+        <div class="modal-btns">
+          <button class="btn btn-ghost btn-sm" onclick="closeModal()">Abbrechen</button>
+          <button class="btn btn-blue btn-sm" onclick="connectGist()">Verbinden</button>
+        </div>
+      `}
+    </div>
+  `);
+}
+
+window.connectGist = function() {
+  const tok = document.getElementById('gist-token-input')?.value.trim();
+  const id = document.getElementById('gist-id-input')?.value.trim();
+  if (!tok) { showToast('Bitte Token eingeben'); return; }
+  gistToken = tok;
+  gistId = id || '';
+  saveGistSettings();
+  closeModal();
+  setSyncStatus('idle');
+  if (gistId) pullFromGist(); else pushToGist();
+  showToast('Cloud-Sync verbunden');
+};
+
+window.disconnectGist = function() {
+  gistToken = '';
+  gistId = '';
+  saveGistSettings();
+  setSyncStatus('idle');
+  closeModal();
+  showToast('Cloud-Sync getrennt');
+};
+
+// =============================================
+// ESCAPE HELPERS
+// =============================================
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
+// =============================================
+// RENDER ALL
+// =============================================
+function renderAll() {
+  renderSidebar();
+  renderKursPanel();
+  renderAttendancePanel();
+  // Groups: don't reset, just update display
+}
+
+// =============================================
+// INIT
+// =============================================
+function init() {
+  loadLocal();
+  loadGistSettings();
+
+  // Demo course if empty
+  if (state.courses.length === 0) {
+    const demo = {
+      id: uid(),
+      name: 'Alpha 3 · Demo',
+      participants: [
+        'Amira Ben Ali', 'Bogdan Popescu', 'Chen Wei', 'Dilnoza Yusupova',
+        'Emeka Okafor', 'Fatima Al-Rashid', 'György Kovács', 'Hana Novák',
+        'Irina Sokolova', 'José Martínez', 'Karim Benali', 'Leilani Kahale',
+        'Milena Petrov'
+      ]
+    };
+    state.courses.push(demo);
+    state.activeCourseId = demo.id;
+    saveLocal();
+  }
+
+  // Initialize attendance (all present by default)
+  state.courses.forEach(c => {
+    if (!attendance[c.id]) {
+      attendance[c.id] = {};
+      c.participants.forEach(p => attendance[c.id][p] = true);
+    }
+  });
+
+  // Gist sync
+  if (gistToken && gistId) pullFromGist();
+  setSyncStatus('idle');
+
+  // Timer
+  timerTotal = 300; timerRemaining = 300;
+  updateTimerDisplay();
+
+  renderAll();
+}
+
+init();
+</script>
+</body>
+</html>
